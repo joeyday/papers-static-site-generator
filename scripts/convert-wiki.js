@@ -148,10 +148,10 @@ function prepare (page) {
   t = t.replace(/\[\[esv:[^|\]]*\|([^\]]*)\]\]/gi, (_, label) => label.replace(/&nbsp;/g, ' '))
   t = t.replace(/\[\[esv:([^\]|]*)\]\]/gi, (_, ref) => ref.replace(/[+_]/g, ' '))
   t = t.replace(/\[\[lds:([\w]+)\/(\d+)\/(\d+)[^\]|]*\|([^\]]*)\]\]/gi, (_, book, chapter, verse, text) =>
-    `[${text}](https://www.churchofjesuschrist.org/study/scriptures/bofm/${book.replace(/_/g, '-')}/${chapter}?lang=eng&id=p${verse}#p${verse})`)
+    `[https://www.churchofjesuschrist.org/study/scriptures/bofm/${book.replace(/_/g, '-')}/${chapter}?lang=eng&id=p${verse}#p${verse} ${text}]`)
   t = t.replace(/\[\[Category:[^\]]*\]\]\s*/gi, '')
   t = t.replace(/\[\[(w|wikipedia|wikiquote):([^\]|]+)(?:\|([^\]]*))?\]\]/gi, (_, wiki, target, text) =>
-    `[${text ?? target}](${INTERWIKI[wiki.toLowerCase()]}${encodeURI(target.trim().replace(/ /g, '_'))})`)
+    `[${INTERWIKI[wiki.toLowerCase()]}${encodeURI(target.trim().replace(/ /g, '_'))} ${text ?? target}]`)
 
   // Templates. The ones with a Markdown equivalent are kept as partial calls; the rest are reported.
   // The Confession's chapters are partials, included by their own page and by the whole Confession.
