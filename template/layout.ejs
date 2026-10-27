@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= url === '/' ? title : `${title} – Joey’s Papers` %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <%# Nothing here is for search engines: every page says so, and robots.txt agrees. %>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://papers.jday.co<%= url %>">
+    <link rel="stylesheet" href="/asset/style.css?<%= cacheBust %>">
+    <%# Freight Text Pro, from the same Adobe Fonts kit the wiki used. %>
+    <link rel="stylesheet" href="https://use.typekit.net/qwp6cjh.css">
+    <link rel="icon" href="/asset/favicon.svg?<%= cacheBust %>" type="image/svg+xml">
+    <meta property="og:site_name" content="Joey’s Papers">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="<%= title %>">
+    <meta property="og:url" content="https://papers.jday.co<%= url %>">
+<% if (description) { %>    <meta name="description" content="<%= description %>">
+    <meta property="og:description" content="<%= description %>">
+<% } %></head>
+<body>
+    <article>
+        <header>
+            <h1><%= title %></h1>
+<%- header %>
+        </header>
+<%- content %>
+<% if (about) { %>        <footer class="about">
+            <div>
+                <h2>Who is Joey Day?</h2>
+                <img src="/image/avatar_prisma.jpg">
+                <p>Hi, I’m Joey. I’m a 40-something software engineer (read: big nerd) in Salt Lake City. When I grow up I’d like to be a seminary professor (read: even bigger nerd). You can read more at <a href="http://joeyday.com">my blog</a> or contact me on <a href="http://facebook.com/joeynday">Facebook</a> or <a href="http://twitter.com/joeyday">Twitter</a>.</p>
+            </div>
+        </footer>
+<% } %>    </article>
+</body>
+</html>

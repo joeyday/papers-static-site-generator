@@ -1,0 +1,448 @@
+/* ─── Joey's Papers ─────────────────────────────────────────────────────────────
+   One page is one card on a photograph of bark. Every color is an OKLCH variable, and the dark
+   theme only redefines them (it follows the reader's system; there is no switch). Fonts:
+   Freight Text Pro (Adobe Fonts, loaded in the layout) for the text, as on the wiki, and League
+   Gothic for headings and terms. */
+
+@font-face {
+  font-family: "League Gothic";
+  src: url("fonts/League_Gothic-webfont.woff") format("woff");
+}
+
+:root {
+  --font-text: "freight-text-pro", serif;
+  --font-display: "League Gothic", sans-serif;
+  --font-mono: monospace;
+
+  --backdrop: oklch(0.5 0 0);
+  --paper: oklch(0.985 0.007 100);
+  --ink: oklch(0 0 0);
+  --accent: oklch(0.69 0.19 36);
+  --accent-wash: oklch(0.69 0.19 36 / 0.06);
+  --on-accent: oklch(1 0 0);
+  --rule: oklch(0.8 0 0);
+  --stripe: oklch(0.95 0 0);
+  --highlight: oklch(0.74 0.17 150 / 0.25);
+  --shadow: oklch(0.2 0 0);
+
+  --measure: 30em;
+  --pad: 4em;
+  --radius: 15px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --backdrop: oklch(0.3 0 0);
+    --paper: oklch(0.23 0.008 90);
+    --ink: oklch(0.92 0.008 90);
+    --accent: oklch(0.74 0.16 40);
+    --accent-wash: oklch(0.74 0.16 40 / 0.1);
+    --on-accent: oklch(0.2 0.02 40);
+    --rule: oklch(0.42 0 0);
+    --stripe: oklch(0.27 0.008 90);
+    --highlight: oklch(0.6 0.15 150 / 0.3);
+    --shadow: oklch(0 0 0);
+  }
+}
+
+/* ─── The page ─── */
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--backdrop) url("bark.webp") center top / cover no-repeat fixed;
+  color: var(--ink);
+  font: 22px / 1.45 var(--font-text);
+  font-feature-settings: "kern", "liga", "onum";
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  hyphens: auto;
+  hyphenate-limit-chars: 6 3 3;
+  hanging-punctuation: first last;
+}
+
+/* The card is a grid of three columns: padding, text, padding. A child that should reach the
+   card's edges (the author box) spans all three. */
+body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 1.8em 1em;
+}
+
+article {
+  display: grid;
+  grid-template-columns: [full-start] var(--pad) [text-start] minmax(0, var(--measure)) [text-end] var(--pad) [full-end];
+  justify-self: center;
+  width: min(100%, calc(var(--measure) + 2 * var(--pad)));
+  padding-block: var(--pad);
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: 0 0 6px 3px var(--shadow);
+}
+
+article > * { grid-column: text; }
+
+/* ─── Headings ─── */
+
+h1, h2, h3 {
+  font: normal 150% / 1.1 var(--font-display);
+  margin: 1.33em 0 0.67em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+h1 {
+  margin: 0;
+  padding-bottom: 0.1em;
+  font-size: 300%;
+  border-bottom: 0.25rem solid var(--accent);
+}
+
+h2 {
+  margin: 1.11em 0 0.555em;
+  font-size: 200%;
+  border-bottom: 1px solid var(--rule);
+}
+
+h4, h5, h6 {
+  margin: 1.68em 0 0.83em;
+  font-size: 110%;
+  text-wrap: balance;
+}
+
+h1 small, h2 small, h3 small, dt small {
+  position: relative;
+  top: -0.15em;
+  font: italic 75% var(--font-text);
+  text-transform: none;
+}
+
+/* The subtitle and byline sit under the title, flush right, tucked up into its rule. */
+.subtitle, .byline {
+  margin: 0.3em 0 0;
+  font-size: 140%;
+  text-align: right;
+  text-wrap: balance;
+}
+
+.subtitle + .byline { margin-top: 0.5em; }
+
+.byline img, .endmark img {
+  height: 1.25em;
+  width: auto;
+  border-radius: 50%;
+  vertical-align: top;
+}
+
+header { margin-bottom: 1.2em; }
+
+
+/* ─── Text ─── */
+
+p, blockquote, li, dd {
+  text-wrap: pretty;
+}
+
+p, blockquote {
+  margin: 0.4em 0;
+  text-align: justify;
+  text-indent: 2em;
+}
+
+p.no-indent, blockquote.no-indent { text-indent: 0; }
+
+p.outdent, blockquote.outdent {
+  margin-left: 2em;
+  text-indent: -2em;
+}
+
+/* Lines of verse or address: ragged, never hyphenated, runs hang. */
+p.line-group, blockquote.line-group {
+  margin-left: 4em;
+  text-indent: -4em;
+  text-align: left;
+  hyphens: none;
+}
+
+p.line-group .indent { margin-left: -2em; }
+
+li p, .subtitle, .byline, header p { text-indent: 0; }
+
+blockquote {
+  margin: 1em 2em;
+  padding-inline: 1em;
+  border-left: 1px solid var(--accent);
+}
+
+blockquote :is(h2, h3, h4, h5, h6, li) { text-indent: 0; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover { text-decoration: underline; }
+
+ol, ul { padding-left: 2em; }
+ol ol { list-style-type: lower-alpha; }
+ol ol ol { list-style-type: lower-roman; }
+
+dt {
+  font: normal 120% var(--font-display);
+  text-transform: uppercase;
+}
+
+small, abbr {
+  font-size: 0.8em;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+/* Abbreviations are small capitals where the font has them. */
+@supports (font-variant-caps: all-small-caps) {
+  abbr {
+    font-size: 1.1em;
+    font-weight: 400;
+    font-variant-caps: all-small-caps;
+  }
+}
+
+abbr[title] { cursor: help; }
+
+.roman-num { font-variant-caps: all-small-caps; font-size: 1.1em; }
+
+/* The display face is capitals already. */
+:is(h1, h2, h3, dt) :is(.roman-num, .divine-name, .divine-name-initial, abbr) { font: inherit; }
+
+/* LORD and God: the first letter full size, the rest small capitals. */
+.divine-name { font-variant-caps: all-small-caps; font-size: 1.1em; }
+.divine-name-initial { font-variant-caps: normal; font-size: 0.91em; }
+
+mark {
+  background: linear-gradient(transparent 50%, var(--highlight) 50%);
+  color: inherit;
+}
+
+code, pre {
+  font: 83% var(--font-mono);
+  text-transform: none;
+}
+
+pre {
+  margin: 1.2em 2.4em;
+  padding: 1.2em;
+  overflow: auto;
+  border: 1px dashed var(--accent);
+  background: var(--accent-wash);
+}
+
+hr {
+  width: 33%;
+  margin: 2em auto;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+img { max-width: 100%; height: auto; }
+
+figure { margin: 1em 0; text-align: center; }
+
+.dateline { font: normal 100% var(--font-display); text-transform: uppercase; }
+
+/* A short list set in two columns (a recipe's ingredients). */
+.columns { columns: 2; column-gap: 2em; text-indent: 0; text-align: left; }
+
+/* Small capitals asked for by hand. */
+.smcp { font-variant-caps: all-small-caps; }
+
+.signature img { width: 250px; margin-left: -1.5em; }
+
+.chapter-nav { margin-top: 2em; }
+.chapter-nav p { text-indent: 0; text-align: center; }
+
+/* A note set apart from the text (the disclaimer on the OPC's report). */
+.notice {
+  margin: 1.5em 0;
+  padding: 0.5em 1em;
+  border: 1px solid var(--rule);
+  font-size: 85%;
+}
+
+.notice p { text-indent: 0; }
+
+/* ─── Tables ─── */
+
+.table-scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 1px solid var(--rule);
+}
+
+tr:nth-child(odd) { background: var(--stripe); }
+th { font-size: 120%; }
+th, td { padding: 0.5em; vertical-align: top; text-align: left; }
+
+/* ─── Footnotes and bibliographies ─── */
+
+sup.footnote-ref {
+  position: relative;
+  top: -0.4em;
+  margin-inline: 0.175em;
+  font-size: 66.7%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+
+.footnotes {
+  font-size: 66.7%;
+  text-align: justify;
+}
+
+.footnotes h2 { font-size: 300%; }
+
+.footnotes ol {
+  columns: 2;
+  column-gap: 3em;
+  margin: 0;
+  orphans: 10;
+  widows: 10;
+}
+
+.footnotes p { text-indent: 0; margin: 0; display: inline; }
+.footnote-backref { margin-left: 0.3em; }
+
+.bibliography { font-size: 66.7%; columns: 2; column-gap: 3em; }
+.bibliography p, .inline-bibliography p { margin-left: 2em; text-indent: -2em; }
+
+/* ─── Callouts and the author box ─── */
+
+.callout, .callout-center {
+  margin: 1em;
+  padding: 0.5em 0.25em;
+  border-block: 1px solid var(--accent);
+  font-size: 125%;
+  font-style: italic;
+  text-align: center;
+}
+
+.callout-left, .callout-right {
+  width: 50%;
+  margin-top: 0.75em;
+  padding: 0.5em 0.25em;
+  border-block: 1px solid var(--accent);
+  font-size: 125%;
+  font-style: italic;
+  text-align: center;
+}
+
+.callout-left { float: left; margin-right: 1em; margin-left: -1.5em; }
+.callout-right { float: right; margin-left: 1em; margin-right: -1.5em; }
+
+.about {
+  grid-column: full;
+  margin: 4em 0 calc(var(--pad) * -1);
+  padding: var(--pad);
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.about > div {
+  display: grid;
+  grid-template: "title title" auto "photo text" 1fr / 5.25em 1fr;
+  column-gap: 1em;
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+.about h2 {
+  grid-area: title;
+  margin: 0 0 0.555em;
+  border-color: currentcolor;
+}
+
+.about img { grid-area: photo; width: 100%; border-radius: 50%; }
+.about p { grid-area: text; margin: 0; text-indent: 0; text-align: left; }
+.about a, .about abbr { color: inherit; }
+.about a { text-decoration: underline; }
+
+/* ─── Small screens: the card gives way to the page itself ─── */
+
+@media (max-width: 56.5em) {
+  html { background: var(--paper); }
+  body { padding: 0; }
+  article {
+    --pad: 1em;
+    padding-block: 1em 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .about { margin-top: 2em; border-radius: 0; }
+  .callout-left, .callout-right { width: 45%; margin-inline: 0 1em; }
+  .callout-right { margin: 0.75em 0 0.25em 1em; }
+}
+
+@media (max-width: 38em) {
+  html { font-size: 19px; }
+  h1 { font-size: 250%; }
+  h2, .about h2 { font-size: 180%; }
+  h3 { font-size: 120%; }
+  h4, h5, h6 { font-size: 100%; }
+  .subtitle, .byline { font-size: 120%; }
+  blockquote, pre { margin-inline: 0.5em; padding-inline: 0.75em; }
+  .footnotes ol, .bibliography { columns: 1; }
+  .callout-left, .callout-right { display: none; }
+}
+
+/* ─── Print ───
+   The card, the photograph and the colors go; the text is black on white at a size for paper.
+   Links print plain, with their address after them unless it is the link text, and nothing
+   breaks across pages where it shouldn't. */
+
+@media print {
+  @page { margin: 2cm; }
+
+  html {
+    background: none;
+    color: #000;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  body { display: block; padding: 0; }
+
+  article {
+    display: block;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  h1, h2, h3, dt { color: #000; border-color: #000; }
+  h1, h2, h3, h4, h5, h6, dt { break-after: avoid; }
+  h1 { font-size: 250%; border-bottom-width: 2pt; }
+  h2 { font-size: 160%; }
+  blockquote, pre, figure, tr, .footnotes li { break-inside: avoid; }
+  p { orphans: 3; widows: 3; }
+
+  a { color: inherit; text-decoration: underline; }
+  a.external:not(.bare-url, .bible-ref)::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    word-break: break-all;
+  }
+  a.bible-ref { text-decoration: none; }
+
+  blockquote { border-left-color: #000; }
+  mark { background: none; text-decoration: underline; }
+  tr:nth-child(odd) { background: none; }
+  table, th, td { border: 1px solid #999; }
+
+  .footnotes h2 { font-size: 160%; }
+  .about { margin: 2em 0 0; padding: 1em 0 0; background: none; color: inherit; border-top: 1px solid #000; border-radius: 0; }
+  .callout-left, .callout-right { float: none; width: auto; margin: 1em; }
+}
