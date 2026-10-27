@@ -7,7 +7,7 @@ Settled questions, so they aren't re-litigated. Each says who decided and when.
 - **A bespoke unitasker; code is copied from tsgen, not shared** (Joey, 2026-10-27). Drift is fine: each site gets what it needs. Simplicity first: fewer lines, more performant, purpose-built.
 - **Obscure by design; not locked down** (Joey, 2026-10-27). No indexes, search, sitemap, categories, backlinks or random page. `noindex, nofollow` on every page and `Disallow: /` in robots.txt. Wikilinks between pages are fine, and the home page (which lists a few pages) stays. The content repo is private; this repo is public.
 - **No namespaces, notes pages or book** (Joey, 2026-10-27). Pages sit at the root: `papers.jday.co/christian-baptism/`.
-- **Old MediaWiki URLs (`/view/…`) are not preserved** (Joey, 2026-10-27), and revision history is dropped.
+- **Old MediaWiki URLs are kept** (Joey, 2026-10-27, reversing the first answer). Every page's slug is its old wiki page name (`Christian_Baptism`, `cog11.5`), written as a `slug:` and used as written, and `/view/<name>/` redirects to it. Names that were redirects in the wiki are the page's `aliases:` and get `/view/` redirects too. GitHub Pages can't redirect, so these are small HTML pages (meta refresh, canonical). Revision history is still dropped.
 
 ## Content
 - **A standalone vault** (Joey, 2026-10-27), not a folder of the personal "Papers" vault. Hosted on GitHub Pages from a separate private content repo that depends on this generator at a tag, like tsgen's.
