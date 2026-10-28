@@ -50,6 +50,16 @@ function splitHeader (html) {
   return { header: header.trim(), body: html.slice(header.length) }
 }
 
+const redirectPage = (url) => `<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://papers.jday.co${url}">
+<meta http-equiv="refresh" content="0; url=${url}">
+<p><a href="${url}">Continue to the page</a>
+`
+
 async function build ({ outputDir = OUTPUT_DIR } = {}) {
   await cleanOutputDir(outputDir)
 
@@ -79,6 +89,11 @@ async function build ({ outputDir = OUTPUT_DIR } = {}) {
     failures.push(`Scripture references, abbreviations, initials and images that need attention (write a ! before a reference or an all-caps word to opt it out):\n${output.problems.join('\n')}`)
   }
   if (failures.length > 0) throw new BuildError(failures.join('\n\n'))
+
+  // GitHub Pages can't redirect, so each old address (/view/<name>/) is a page that does.
+  for (const [name, page] of vault.redirects) {
+    await output.writeFile(path.join('view', name, 'index.html'), redirectPage(page.url))
+  }
 
   // Nothing is for search engines (every page also says so itself), and GitHub Pages serves
   // the site at its own domain.

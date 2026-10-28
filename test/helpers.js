@@ -39,7 +39,7 @@ export async function buildVault (files = {}) {
     output = (err.stdout ?? '') + (err.stderr ?? '')
   }
   // A page is <url>index.html, except /404/, which is 404.html.
-  const fileFor = (url) => url === '/404/' ? path.join(dist, '404.html') : url.includes('.') ? path.join(dist, url) : path.join(dist, url, 'index.html')
+  const fileFor = (url) => url === '/404/' ? path.join(dist, '404.html') : url.endsWith('/') ? path.join(dist, url, 'index.html') : path.join(dist, url)
   return {
     code,
     output,

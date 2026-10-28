@@ -19,7 +19,6 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import slugify from 'slugify'
 import { BIBLE_BOOKS, bookInfoByCwms, cwmsByName, oneChapterCwms } from '../lib/bible/refs.js'
 import { scanBibleRefs } from '../lib/bible/scan.js'
 import { checkReference } from '../lib/bible/validate.js'
@@ -45,6 +44,7 @@ const stripTags = (s) => s.replace(/<[^>]*>/g, '').replace(/&amp;/g, '&')
 const REDIRECT = /^\s*#REDIRECT\s*\[\[([^\]]+)\]\]/i
 const pages = [] // { old, title, file, text }
 const redirects = new Map() // lowercase old name → lowercase old name it leads to
+const redirectNames = [] // the old names themselves, as the wiki spelled them
 
 for (const file of fs.readdirSync(path.join(wikiDir, 'Main')).sort()) {
   const old = unscore(file.replace(/\.txt$/, '').replace(/__/g, '/'))
@@ -52,6 +52,7 @@ for (const file of fs.readdirSync(path.join(wikiDir, 'Main')).sort()) {
   const redirect = REDIRECT.exec(text)
   if (redirect) {
     redirects.set(old.toLowerCase(), unscore(redirect[1].split('#')[0]).toLowerCase())
+    redirectNames.push(file.replace(/\.txt$/, ''))
     continue
   }
   const display = /\{\{DISPLAYTITLE:([^}]*)\}\}/i.exec(text)?.[1]
@@ -148,10 +149,10 @@ function prepare (page) {
   t = t.replace(/\[\[esv:[^|\]]*\|([^\]]*)\]\]/gi, (_, label) => label.replace(/&nbsp;/g, ' '))
   t = t.replace(/\[\[esv:([^\]|]*)\]\]/gi, (_, ref) => ref.replace(/[+_]/g, ' '))
   t = t.replace(/\[\[lds:([\w]+)\/(\d+)\/(\d+)[^\]|]*\|([^\]]*)\]\]/gi, (_, book, chapter, verse, text) =>
-    `[${text}](https://www.churchofjesuschrist.org/study/scriptures/bofm/${book.replace(/_/g, '-')}/${chapter}?lang=eng&id=p${verse}#p${verse})`)
+    `[https://www.churchofjesuschrist.org/study/scriptures/bofm/${book.replace(/_/g, '-')}/${chapter}?lang=eng&id=p${verse}#p${verse} ${text}]`)
   t = t.replace(/\[\[Category:[^\]]*\]\]\s*/gi, '')
   t = t.replace(/\[\[(w|wikipedia|wikiquote):([^\]|]+)(?:\|([^\]]*))?\]\]/gi, (_, wiki, target, text) =>
-    `[${text ?? target}](${INTERWIKI[wiki.toLowerCase()]}${encodeURI(target.trim().replace(/ /g, '_'))})`)
+    `[${INTERWIKI[wiki.toLowerCase()]}${encodeURI(target.trim().replace(/ /g, '_'))} ${text ?? target}]`)
 
   // Templates. The ones with a Markdown equivalent are kept as partial calls; the rest are reported.
   // The Confession's chapters are partials, included by their own page and by the whole Confession.
@@ -440,7 +441,6 @@ function convert (page) {
 
 // ─── Writing the vault ───
 const yamlString = (s) => (/^[\w][\w ,.'’()&-]*$/.test(s) && !/^(true|false|null|yes|no|\d+)$/i.test(s) && !s.includes(': ') ? s : JSON.stringify(s))
-const slugOf = (s) => slugify(s, { lower: true, strict: true })
 
 // The two committee reports are rebuilt from their sources, when there are any.
 const source = (name) => (sourcesDir && fs.existsSync(path.join(sourcesDir, name)) ? fs.readFileSync(path.join(sourcesDir, name), 'utf-8') : null)
@@ -463,12 +463,13 @@ for (const page of pages) {
   const { md, flags } = convert(page)
   const front = []
   if (page.title !== page.file) front.push(`title: ${yamlString(page.title)}`)
-  // A title long enough to make an unwieldy address keeps the short one the wiki had.
-  if (slugOf(page.file).length > 50 && page.file !== HOME) {
-    const slug = slugOf(page.old)
-    front.push(`slug: ${slug}`)
-    report.longSlugs.push(`${page.file} → ${slug}`)
-  }
+  // The wiki's own page name is the slug, and the names that redirected to the page are its
+  // aliases, so every old address (/view/<name>) still leads somewhere.
+  const name = page.old.replace(/ /g, '_')
+  if (name.includes('/')) report.longSlugs.push(`${page.file} (${name})`)
+  else front.push(`slug: ${name}`)
+  const aliases = redirectNames.filter((alias) => resolve(alias) === page)
+  if (aliases.length > 0) front.push(`aliases: [${aliases.join(', ')}]`)
   if (flags.about) front.push('about: true')
   let body = md
   if (page.wcf) {
@@ -516,7 +517,7 @@ for (const [heading, list] of [
   ['Templates with no equivalent (dropped)', [...report.unknownTemplates]],
   ['Links to no page', report.brokenLinks],
   ['Pictures not found', report.noImage],
-  ['Long titles given their old short slug', report.longSlugs],
+  ['Pages whose old name has a slash (no slug written)', report.longSlugs],
   ['The committee reports, rebuilt from their sources', reportNotes],
   ['References that can’t exist, opted out with !', report.escaped],
   ['Scripture names rewritten (the kinds)', [...new Set(report.scripture.map((r) => r.replace(/^.*?: /, '')))]]

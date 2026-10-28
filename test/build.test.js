@@ -145,3 +145,37 @@ describe('nothing is discoverable', () => {
     assert.equal(await b.exists('/sitemap.xml'), false)
   })
 })
+
+test('a slug is used as written, and the old /view/ addresses redirect', async () => {
+  const site = await buildVault({
+    'Christian baptism.md': '---\nslug: Christian_Baptism\naliases: [baptism_old, cog11.5]\n---\nSee [[Christian baptism]].\n',
+    'Linker.md': 'Go to [[Christian_Baptism]].\n'
+  })
+  try {
+    assert.equal(site.code, 0, site.output)
+    assert.ok(await site.exists('/Christian_Baptism/'))
+    assert.match(await site.read('/linker/'), /href="\/Christian_Baptism\/"/)
+    for (const name of ['Christian_Baptism', 'baptism_old', 'cog11.5']) {
+      assert.match(await site.read(`/view/${name}/`), /http-equiv="refresh" content="0; url=\/Christian_Baptism\/"/)
+    }
+  } finally { await site.cleanup() }
+})
+
+test('a name that two pages answer to at /view/ fails the build', async () => {
+  const site = await buildVault({
+    'One.md': '---\nslug: Same\n---\nx\n',
+    'Two.md': '---\naliases: [Same]\n---\nx\n'
+  })
+  try {
+    assert.notEqual(site.code, 0)
+    assert.match(site.output, /both answer to \/view\/Same\//)
+  } finally { await site.cleanup() }
+})
+
+test('a slug that is not safe in a URL fails the build', async () => {
+  const site = await buildVault({ 'Bad.md': '---\nslug: a/b\n---\nx\n' })
+  try {
+    assert.notEqual(site.code, 0)
+    assert.match(site.output, /can't be a slug/)
+  } finally { await site.cleanup() }
+})
