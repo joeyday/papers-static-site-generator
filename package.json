@@ -1,6 +1,6 @@
 {
   "name": "pgen",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Bespoke static site generator for Joey's Papers (papers.jday.co)",
   "type": "module",

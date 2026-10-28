@@ -140,10 +140,6 @@ header { margin-bottom: 1.2em; }
 
 /* ─── Text ─── */
 
-p, blockquote, li, dd {
-  text-wrap: pretty;
-}
-
 p, blockquote {
   margin: 0.4em 0;
   text-align: justify;

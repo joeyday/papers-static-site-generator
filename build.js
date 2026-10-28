@@ -5,6 +5,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { BuildError } from './lib/errors.js'
+import { escHtml } from './lib/html/escape.js'
 import { describe } from './lib/html/describe.js'
 import { createLayout } from './lib/layout.js'
 import { info, setVerbose } from './lib/log.js'
@@ -89,6 +90,15 @@ async function build ({ outputDir = OUTPUT_DIR } = {}) {
     failures.push(`Scripture references, abbreviations, initials and images that need attention (write a ! before a reference or an all-caps word to opt it out):\n${output.problems.join('\n')}`)
   }
   if (failures.length > 0) throw new BuildError(failures.join('\n\n'))
+
+  // A list of every page, to review the site by; only `pgen serve` builds it, never the deploy.
+  if (command === 'serve') {
+    if (vault.bySlug.has('index')) throw new BuildError(`"${vault.bySlug.get('index').filePath}" has the slug "index", which \`pgen serve\` uses for its list of pages`)
+    const items = vault.pages
+      .toSorted((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base', numeric: true }))
+      .map((page) => `<li><a href="${page.url}">${escHtml(page.title)}</a></li>`)
+    await output.writeFile(path.join('index', 'index.html'), renderLayout(`<ul>\n${items.join('\n')}\n</ul>`, { url: '/index/', title: 'Index' }))
+  }
 
   // GitHub Pages can't redirect, so each old address (/view/<name>/) is a page that does.
   for (const [name, page] of vault.redirects) {
