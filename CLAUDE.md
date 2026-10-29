@@ -27,4 +27,4 @@ Markdown files anywhere (except `partial/` and `image/`) are pages. Filename = t
 - `{{name|arg}}` expands `partial/name.md` (`{{1}}` is the first argument). Partials are the only way to share text between pages: there is no page transclusion (Obsidian draws `![[Page]]` embeds in a style Joey dislikes). The Westminster Confession's chapters are partials (`wcf-i` …) included by their own page and by the whole Confession; footnote labels in a partial must be unique among the partials a page includes (`[^ii-1]`).
 - Partials and pages may contain EJS (`<% %>`), which sees `page` (name, title, slug) of the page being built. Nothing in the migrated corpus uses it today. EJS runs before wikilinks resolve.
 - Footnotes (`[^1]`) get a "Notes" heading written by the generator.
-- Scripture: abbreviations without a space for numbered books (`1Co`, `2Ti`); `!` opts a reference or all-caps word out.
+- Scripture: abbreviations without a space for numbered books (`1Co`, `2Ti`), except a lone reference that spells its book out (`Genesis 1:1`), which stays; `!` opts a reference or all-caps word out.

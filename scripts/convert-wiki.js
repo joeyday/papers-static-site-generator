@@ -111,7 +111,7 @@ function prepare (page) {
 
   // Subtitle, byline and dateline: paragraphs of their own, marked with an attribute.
   t = t.replace(/<(div|p)\s+(?:id|class)="(subtitle|byline)">([\s\S]*?)<\/\1>/g, (_, __, kind, body) =>
-    `\n\n${body.replace(/<br\s*\/?>\s*/g, ' · ').trim()} ${bit(`{.${kind}}`)}\n\n`)
+    `\n\n${body.trim()} ${bit(`{.${kind}}`)}\n\n`)
   t = t.replace(/<span (?:id|class)="dateline">([\s\S]*?)<\/span>/g, (_, body) => bit(`[${body}]{.dateline}`))
 
   // A paragraph with a class is a paragraph with an attribute.
@@ -300,9 +300,10 @@ function optOutCaps (line) {
 }
 
 // ─── Markdown, tidied ───
-// Scripture: every named reference gets its book's standard abbreviation, as the generator
-// writes them (Jn, 1Co); nothing is merged or reordered, since the order of a list of proof
-// texts is the author's. The spellings the scanner doesn't know are read here too.
+// Scripture: a reference in a list (Jn 3:16; Ro 5:8) gets its book's standard abbreviation, as
+// the generator writes them (Jn, 1Co), and so does a lone one that is abbreviated in any way;
+// a lone one spelled out in full stays. Nothing is merged or reordered, since the order of a
+// list of proof texts is the author's. The spellings the scanner doesn't know are read here too.
 const LOOSE = {
   Ge: ['Gen', 'Gn'],
   Ex: ['Exod', 'Exo'],
@@ -316,8 +317,8 @@ const LOOSE = {
   '2Sa': ['2Sam'],
   '1Ki': ['1Kgs'],
   '2Ki': ['2Kgs'],
-  '1Ch': ['1Chr'],
-  '2Ch': ['2Chr'],
+  '1Ch': ['1Chr', '1Chron'],
+  '2Ch': ['2Chr', '2Chron'],
   Ne: ['Neh'],
   Est: ['Esth'],
   Ps: ['Pss', 'Psa'],
@@ -364,24 +365,49 @@ const stripped = (name) => name.replace(/\s+/g, '')
 const cwmsByLooseName = new Map()
 for (const names of BIBLE_BOOKS) for (const name of names) cwmsByLooseName.set(stripped(name), names[names.length - 1])
 for (const [cwms, names] of Object.entries(LOOSE)) for (const name of names) cwmsByLooseName.set(name, cwms)
+const ROMAN_BOOK = /(?<![\w.])(I{1,3})\s+([A-Z][a-z]+)(?=\.?\s*\d)/g
 const NAME_BEFORE_NUMBER = /(?<![\w.])([123]\s?)?([A-Z][a-z]+(?:\s+of\s+[A-Z][a-z]+)?)(\.?)(?=\s*\d)/g
+
+// The names a reference may spell out and keep when it stands alone.
+const FULL_NAMES = new Set([...BIBLE_BOOKS.map((names) => names[0]), 'Psalm', 'Song of Songs'].map((name) => name.toLowerCase()))
+
+const LIST_GAP = /^[\d:.\sf–—-]*[;,][\d:.,;\sf–—-]*(?:(?:and|or|&|cf\.?|see|also)\s*)*$/i
+
+const listGap = (gap) => LIST_GAP.test(gap) || (gap.includes(';') && /^[^.!?()[\]]{1,40}$/.test(gap))
 
 const scan = (line) => scanBibleRefs(line, { lastCwms: null, lastChapter: null, chapterLevel: false, translation: 'ESV' })
 
 function normalizeScripture (line, where) {
+  // a Roman numeral before a book is an Arabic one ("II Kings 13:23" is "2 Kings 13:23")
+  line = line.replace(ROMAN_BOOK, (all, roman, word) => cwmsByLooseName.has(roman.length + stripped(word)) ? `${roman.length} ${word}` : all)
   // a name the scanner doesn't know becomes the standard abbreviation
   line = line.replace(NAME_BEFORE_NUMBER, (all, number = '', word, period) => {
     const cwms = cwmsByLooseName.get(number.trim() + stripped(word))
     return cwms && (period || !cwmsByName.has((number + word).toLowerCase().replace(/\s+/g, ' '))) ? cwms : all
   })
-  // every named reference gets its book's abbreviation
+  // "Mt 21: 25" has a space after the colon, which the generator wouldn't read as a verse
   for (const item of scan(line).filter((i) => i.named && !i.optOut).reverse()) {
+    const space = /^: +(?=\d)/.exec(line.slice(item.end))
+    if (space) line = line.slice(0, item.end) + ':' + line.slice(item.end + space[0].length)
+  }
+  // Every named reference gets its book's abbreviation, except one that stands alone in prose
+  // and spells its book out ("Genesis 1:1", "Psalm 23"): that stays as written. A reference is
+  // in a list when a ; or , joins it to another (or to a bare chapter or verse). What sits
+  // between two references is numbers the scanner didn't read ("Mt 21: 25; Jn 1: 33", "Ge 1:1ff;
+  // Ex 20:11"), the separator, and perhaps "and" or "cf."; or, short of the end of the sentence, a
+  // semicolon and a label ("1Sa 1:11; Samson, Jdg 13:3–5").
+  const items = scan(line)
+  const joined = (a, b) => a && b && !a.optOut && !b.optOut && listGap(line.slice(a.end, b.start))
+  const inList = items.map((item, i) => joined(items[i - 1], item) || joined(item, items[i + 1]))
+  for (const [i, item] of [...items.entries()].reverse()) {
+    if (!item.named || item.optOut) continue
     const written = line.slice(item.start, item.end)
     const name = /^(\d?\s*[A-Za-z][A-Za-z ]*?)(?=\s*\d)/.exec(written)?.[1]
-    const abbr = name && bookInfoByCwms.get(item.cwms).bookCwms
-    if (!name || name === abbr) continue
-    line = line.slice(0, item.start) + abbr + line.slice(item.start + name.length)
-    report.scripture.push(`${where}: ${name} → ${abbr}`)
+    const info = bookInfoByCwms.get(item.cwms)
+    if (!name || name === info.bookCwms) continue
+    if (!inList[i] && FULL_NAMES.has(name.replace(/\s+/g, ' ').toLowerCase())) continue
+    line = line.slice(0, item.start) + info.bookCwms + line.slice(item.start + name.length)
+    report.scripture.push(`${where}: ${name} → ${info.bookCwms}`)
   }
   // in a book of one chapter a lone number is a verse ("Jude 25" is "Jude 1:25")
   for (const item of scan(line).filter((i) => i.named && !i.optOut && oneChapterCwms.has(i.cwms) && i.verseStart === undefined && i.chapter !== '1').reverse()) {
