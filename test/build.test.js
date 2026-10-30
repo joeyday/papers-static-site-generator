@@ -71,6 +71,14 @@ describe('the pipeline', { concurrency: true }, () => {
     assertFails(await build({ 'A.md': page('See Romans 17.') }), /Romans has 16 chapters/)
   })
 
+  test('a bare number after a semicolon is a chapter, and after a comma a verse', async () => {
+    const b = await build({ 'A.md': page('Heb 4:2; 11 and Jn 3:16, 18; 5, 7.') })
+    assert.equal(b.code, 0, b.output)
+    const hrefs = [...(await b.read('/a/')).matchAll(/href="https:\/\/ref\.ly\/([^"]+)"/g)].map((m) => m[1])
+    assert.deepEqual(hrefs, ['Heb4.2;ESV', 'Heb11;ESV', 'Jn3.16;ESV', 'Jn3.18;ESV', 'Jn5;ESV', 'Jn7;ESV'])
+    assertFails(await build({ 'A.md': page('Ro 4:13–16; 20–25') }), /Romans has 16 chapters/)
+  })
+
   test('a number after an italic title is not a verse', async () => {
     const b = await build({ 'A.md': page('See John 3:16. Buttrick, *The Interpreters Bible*, 12:293–94.') })
     assert.equal(b.code, 0, b.output)

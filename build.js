@@ -95,6 +95,7 @@ async function build ({ outputDir = OUTPUT_DIR } = {}) {
   if (command === 'serve') {
     if (vault.bySlug.has('index')) throw new BuildError(`"${vault.bySlug.get('index').filePath}" has the slug "index", which \`pgen serve\` uses for its list of pages`)
     const items = vault.pages
+      .filter((page) => page.slug !== 'home' && page.slug !== '404')
       .toSorted((a, b) => a.title.localeCompare(b.title, 'en', { sensitivity: 'base', numeric: true }))
       .map((page) => `<li><a href="${page.url}">${escHtml(page.title)}</a></li>`)
     await output.writeFile(path.join('index', 'index.html'), renderLayout(`<ul>\n${items.join('\n')}\n</ul>`, { url: '/index/', title: 'Index' }))
@@ -183,7 +184,7 @@ function watchAndRebuild ({ reloadPages }) {
 // pgen serve        build, then serve the output locally (see serve.js) and rebuild whenever
 //                   the vault or the template changes, with:
 //   --verbose       print every "Built …" line; otherwise only warnings, errors and the address.
-//   --port <n>      serve on port n instead of 4000 (also --port=n).
+//   --port <n>      serve on port n instead of 4001 (also --port=n).
 //   --no-watch      serve the first build without rebuilding on changes.
 
 const USAGE = 'Usage: pgen [build | serve [--verbose] [--no-watch] [--port <n>]]'
