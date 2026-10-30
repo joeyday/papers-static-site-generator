@@ -6,7 +6,7 @@ import path from 'path'
 // /foo redirects to /foo/ when foo is a directory, and anything unmatched
 // serves 404.html with a 404 status. Bound to localhost only.
 
-const DEFAULT_PORT = 4000
+const DEFAULT_PORT = 4001
 
 const CONTENT_TYPES = {
   '.html': 'text/html; charset=utf-8',
