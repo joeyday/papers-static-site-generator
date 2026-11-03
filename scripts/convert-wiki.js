@@ -412,7 +412,7 @@ function normalizeScripture (line, where) {
   // in a book of one chapter a lone number is a verse ("Jude 25" is "Jude 1:25")
   for (const item of scan(line).filter((i) => i.named && !i.optOut && oneChapterCwms.has(i.cwms) && i.verseStart === undefined && i.chapter !== '1').reverse()) {
     const written = line.slice(item.start, item.end)
-    const at = item.start + /^!?\d?\s*[A-Za-z ]+?\s*/.exec(written)[0].length
+    const at = item.start + /^!?\d?\s*[A-Za-z]+\.?\s*/.exec(written)[0].length
     line = line.slice(0, at) + '1:' + line.slice(at)
   }
   // a reference that can't exist is opted out, with the chain of references it belongs to
