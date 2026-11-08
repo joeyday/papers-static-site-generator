@@ -26,6 +26,7 @@ Frontmatter is optional YAML between `---` lines at the very top of the file. Ke
 | `title` | text | The title, if different from the filename. |
 | `slug` | text | The address of the page, used exactly as written (`Christian_Baptism`, `cog11.5`). Without it, the address is the slugified filename (`My Page` → `my-page`). Allowed characters: letters, digits and `. _ - ~ * ! $ ( ) + , ; : @ =`. |
 | `aliases` | list of text | Other names the page used to go by. Same character rules as `slug`. |
+| `subtitle` | text | A line under the title. Markdown works in it (italics, links, footnotes, references). |
 | `description` | text | A one-sentence summary. Without it, the first paragraph with text serves, trimmed to about 160 characters. |
 | `hidden` | true/false | The page is not published, and nothing may link to it. |
 | `about` | true/false | Add the "Who is Joey Day?" box at the bottom. |
@@ -38,17 +39,18 @@ Two folders hold material that is not a page: `partial/` (see [Partials](#partia
 
 The title is never written in the body; it comes from the filename or frontmatter. Body headings therefore start at `##`.
 
-A document may open with a subtitle and a byline, written as paragraphs with these classes:
+A document may have a subtitle, set in frontmatter, and a byline, written as the first paragraph of the body with the class `byline`:
 
 ```markdown
-A Short Defence {.subtitle}
-
+---
+subtitle: A Short Defence
+---
 by Joey Day {.byline}
 
 The text begins here.
 ```
 
-They belong to the header, under the title. They count only at the very start of the body.
+Both belong to the header, under the title, subtitle first. The byline counts only at the very start of the body. A subtitle runs through the same rules as the body, so it may hold emphasis, wikilinks, footnotes and references.
 
 ## Standard Markdown
 
@@ -123,7 +125,7 @@ These are the class names the site gives a meaning to:
 
 | Class | On | Meaning |
 |---|---|---|
-| `subtitle`, `byline` | paragraph | Header lines under the title. |
+| `byline` | paragraph | The header line under the subtitle. |
 | `no-indent` | paragraph, blockquote | No first-line indent. |
 | `outdent` | paragraph, blockquote | Hanging indent (bibliography entries). |
 | `line-group` | paragraph, blockquote | Verse or an address: ragged right, hanging runs, no hyphenation. A `[ ]{.indent}` span inside pulls a line back out. |
