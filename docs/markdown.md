@@ -243,7 +243,7 @@ References inside links, headings and code are not treated as references.
 
 These are conventions about how text is written, each backed by a list kept with the content.
 
-**Abbreviations.** Every all-caps word of two or more letters (`NASA`, `UBS5`, `KJV`) must be explained: listed with its expansion in `abbreviations.json` (it then carries its expansion as a tooltip and is set in small capitals), or be a Roman numeral, or a divine name. A word that is none of these but should stand as written takes a `!`: `!NASA`. The `!` is dropped from the text. Words in an `abbreviations.json` are matched case-sensitively, as whole words, longest first (`e.g.`, `cf.`, `JS–H`).
+**Abbreviations.** Every all-caps word of two or more letters (`NASA`, `UBS5`, `KJV`) must be explained: listed with its expansion in `abbreviations.json` (it then carries its expansion as a tooltip and is set in small capitals), or be a Roman numeral, or a divine name. A word that should stand as written takes a `!`: `!NASA`. That skips the check, and it also stops a word that *is* in `abbreviations.json` from being wrapped, so `Corlett !PR` stays plain even though `PR` is a listed abbreviation. The `!` is dropped from the text. Words in an `abbreviations.json` are matched case-sensitively, as whole words, longest first (`e.g.`, `cf.`, `JS–H`).
 
 **Initials.** Two or more initials (`R.C.`, `J.R.R.`) must be listed in `initials.json` along with the surname, as `"R.C. Sproul"`. Both `R.C. Sproul` and `Sproul, R.C.` find that entry. Initials with no surname beside them are an error. A single initial or title (`Dr.`) is left alone.
 

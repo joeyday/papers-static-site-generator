@@ -102,6 +102,12 @@ describe('the pipeline', { concurrency: true }, () => {
     assert.match(html, /Chapter XIV and X\.III, but <span class="roman-num">XIV<\/span>; Wow!<span class="roman-num">XIV<\/span>\./)
   })
 
+  test('a ! opts an abbreviation out of its <abbr> as well as out of the check', async () => {
+    const b = await build({ 'A.md': page('The ESV, not !ESV, but Wow!ESV and !NASA.') })
+    assert.equal(b.code, 0, b.output)
+    assert.match(await b.read('/a/'), /The <abbr title="English Standard Version">ESV<\/abbr>, not ESV, but Wow!<abbr title="English Standard Version">ESV<\/abbr> and NASA\./)
+  })
+
   test('an unexplained all-caps word, or initials, or an image fail the build', async () => {
     assertFails(await build({ 'A.md': page('NASA') }), /NASA is not in abbreviations\.json/)
     assertFails(await build({ 'A.md': page('J.K. Rowling') }), /initials "J\.K\." need an entry/)
