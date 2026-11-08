@@ -146,13 +146,17 @@ describe('the pipeline', { concurrency: true }, () => {
 
 describe('the header', () => {
   test('a subtitle (frontmatter, Markdown) and a byline that open a page move into its header', async () => {
-    const b = await build({ 'A.md': page('by Joey {.byline}\n\nBody.\n\n[^1]: Note.', 'subtitle: A subtitle[^1]\n') })
+    const b = await build({ 'A.md': page('Body.\n\n[^1]: Note.', 'subtitle: A subtitle[^1]\nbyline: by *Joey*\n') })
     assert.equal(b.code, 0, b.output)
-    assert.match(await b.read('/a/'), /<h1>T<\/h1>\s*<p class="subtitle">A subtitle[\s\S]*<\/p>\s*<p class="byline">by Joey<\/p>\s*<\/header>\s*<p>Body\./)
+    assert.match(await b.read('/a/'), /<h1>T<\/h1>\s*<p class="subtitle">A subtitle[\s\S]*<\/p>\s*<p class="byline">by <em>Joey<\/em><\/p>\s*<\/header>\s*<p>Body\./)
   })
 
-  test('a subtitle must be text', async () => {
-    assertFails(await build({ 'A.md': page('Body.', 'subtitle: [a, b]\n') }), /"subtitle" must be text/)
+  test('an unknown or misspelt frontmatter key fails the build', async () => {
+    assertFails(await build({ 'A.md': page('Body.', 'subtitel: Oops\n') }), /unknown frontmatter key "subtitel"/)
+  })
+
+  test('a subtitle or byline must be text', async () => {
+    assertFails(await build({ 'A.md': page('Body.', 'subtitle: [a, b]\nbyline: [c]\n') }), /"subtitle" must be text[\s\S]*"byline" must be text/)
   })
 })
 
