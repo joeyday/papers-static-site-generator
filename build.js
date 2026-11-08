@@ -43,8 +43,8 @@ async function cleanOutputDir (dir) {
   await fs.mkdir(dir, { recursive: true })
 }
 
-// A page's subtitle (`subtitle:`, made a paragraph by renderBody) and byline (`by X {.byline}`)
-// are paragraphs that open its body; in the page they belong in the header, under the title.
+// A page's subtitle and byline (`subtitle:` and `byline:`, made paragraphs by renderBody) open
+// its body; in the page they belong in the header, under the title.
 const HEADER_RE = /^(?:\s*<p class="(?:subtitle|byline)">[\s\S]*?<\/p>)+/
 function splitHeader (html) {
   const header = HEADER_RE.exec(html)?.[0] ?? ''
