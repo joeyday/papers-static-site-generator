@@ -127,7 +127,8 @@ These are the class names the site gives a meaning to:
 |---|---|---|
 | `no-indent` | paragraph, blockquote | No first-line indent. |
 | `outdent` | paragraph, blockquote | Hanging indent (bibliography entries). |
-| `line-group` | paragraph, blockquote | Verse or an address: ragged right, hanging runs, no hyphenation. A `[ ]{.indent}` span inside pulls a line back out. |
+| `indent` | paragraph | The whole paragraph indented, by the same amount as a normal first-line indent. |
+| `line-group` | paragraph, blockquote | Verse or an address: ragged right, hanging runs, no hyphenation. A `[ ]{.indent}` span (the same class on a span, not a paragraph) inside pulls a line back out. |
 | `callout`, `callout-center` | div | A centred pull quote. A bare `:::` is a `callout`. |
 | `callout-left`, `callout-right` | div | A pull quote beside the text. |
 | `notice` | div | A boxed note, in smaller type (a disclaimer). |
