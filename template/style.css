@@ -153,6 +153,12 @@ p.outdent, blockquote.outdent {
   text-indent: -2em;
 }
 
+/* The whole paragraph indented by the same amount as a first line. */
+p.indent {
+  margin-left: 2em;
+  text-indent: 0;
+}
+
 /* Lines of verse or address: ragged, never hyphenated, runs hang. */
 p.line-group, blockquote.line-group {
   margin-left: 4em;
@@ -161,7 +167,7 @@ p.line-group, blockquote.line-group {
   hyphens: none;
 }
 
-p.line-group .indent { margin-left: -2em; }
+p.line-group span.indent { margin-left: -2em; }
 
 li p, .subtitle, .byline, header p { text-indent: 0; }
 
